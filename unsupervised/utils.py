@@ -6,8 +6,7 @@ from __future__ import print_function
 import re
 
 import tensorflow as tf
-from tensorflow import gfile
-
+import tensorflow.io.gfile as gfile
 # pylint: disable=invalid-name
 
 # Special vocabulary symbols - we always put them at the start.
@@ -59,7 +58,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
             if None, basic_tokenizer will be used.
         normalize_digits: Boolean; if true, all digits are replaced by 0s.
     """
-    if not gfile.Exists(vocabulary_path):
+    if not gfile.exists(vocabulary_path):
         print("Creating vocabulary %s from data %s" % (vocabulary_path, data_path))
         vocab = {}
         with gfile.GFile(data_path, mode="rb") as f:
@@ -81,7 +80,11 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
                 vocab_list = vocab_list[:max_vocabulary_size]
             with gfile.GFile(vocabulary_path, mode="wb") as vocab_file:
                 for w in vocab_list:
-                    vocab_file.write(w + b"\n")
+                    if not isinstance(w, str):
+                        vocab_file.write(w + b"\n")
+                    else:
+                        vocab_file.write(w.encode('utf-8') + b"\n")
+
 
 
 def initialize_vocabulary(vocabulary_path):
@@ -103,12 +106,13 @@ def initialize_vocabulary(vocabulary_path):
     Raises:
         ValueError: if the provided vocabulary_path does not exist.
     """
-    if gfile.Exists(vocabulary_path):
+    if gfile.exists(vocabulary_path):
         rev_vocab = []
-        with gfile.GFile(vocabulary_path, mode="rb") as f:
+        with gfile.GFile(vocabulary_path, mode="r") as f:
             rev_vocab.extend(f.readlines())
-        rev_vocab = [tf.compat.as_bytes(line.strip()) for line in rev_vocab]
-        vocab = dict([(x, y) for (y, x) in enumerate(rev_vocab)])
+        #rev_vocab = [line in rev_vocab]
+        #rev_vocab = [tf.compat.as_bytes(line.decode('utf-8').strip()) for line in rev_vocab]
+        vocab = dict([(x.strip(), y) for (y, x) in enumerate(rev_vocab)])
         return vocab, rev_vocab
     raise ValueError("Vocabulary file %s not found." % vocabulary_path)
 
@@ -157,10 +161,10 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
             if None, basic_tokenizer will be used.
         normalize_digits: Boolean; if true, all digits are replaced by 0s.
     """
-    if not gfile.Exists(target_path):
+    if not gfile.exists(target_path):
         print("Tokenizing data in %s" % data_path)
         vocab, _ = initialize_vocabulary(vocabulary_path)
-        with gfile.GFile(data_path, mode="rb") as data_file:
+        with gfile.GFile(data_path, mode="r") as data_file:
             with gfile.GFile(target_path, mode="w") as tokens_file:
                 counter = 0
                 for line in data_file:
@@ -173,7 +177,7 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
 
 def smile_tokenizer(line):
     """Return each non-empty character as the token."""
-    return list(line.strip().replace(" ", ""))
+    return list(line.decode('utf-8').strip().replace(" ", ""))
 
 def true_smile_tokenizer(line):
     """Return each character or atom as the token."""
