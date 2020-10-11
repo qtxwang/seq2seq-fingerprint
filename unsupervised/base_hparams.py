@@ -1,16 +1,18 @@
 """ Hyper parameters"""
 import tensorflow as tf
+from tensorboard.plugins.hparams import api as hp
 
 def build_base_hparams():
     """build hyper-parameters"""
-    hparams = tf.contrib.training.HParams(dropout_rate=0.5,
-                                          num_layers=3,
-                                          size=128,
-                                          learning_rate=0.5,
-                                          learning_rate_decay_factor=0.99,
-                                          buckets=[[30, 30], [60, 60], [90, 90]],
-                                          target_vocab_size=41,
-                                          batch_size=256,
-                                          source_vocab_size=41,
-                                          max_gradient_norm=5.0)
+    hparams = [
+            hp.HParam("dropout_rate", hp.Discrete([0.5])),
+            hp.HParam("num_layers", hp.Discrete([3])),
+            hp.HParam("size",hp.Discrete([128])),
+            hp.HParam("learning_rate", hp.Discrete([0.5])),
+            hp.HParam("learning_rate_decay_factor", hp.Discrete([0.99])),
+            hp.HParam("target_vocab_size", hp.Discrete([41])),
+            hp.HParam("batch_size", hp.Discrete([256])),
+            hp.HParam("source_vocab_size", hp.Discrete([41])),
+            hp.HParam("max_gradient_norm", hp.Discrete([5.0]))
+        ]
     return hparams

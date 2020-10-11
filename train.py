@@ -18,7 +18,7 @@ from unsupervised.utils import EOS_ID, PAD_ID
 from unsupervised.base_hparams import build_base_hparams
 
 with sm.app.flags.Subcommand("build", dest="action"):
-    sm.app.flags.DEFINE_string("model_dir", r"C:\Users\seq2seq\model", "model path of the seq2seq fingerprint.",
+    sm.app.flags.DEFINE_string("model_dir", r"/home/xwang/github/seq2seq-fingerprint/model/", "model path of the seq2seq fingerprint.",
                                required=True)
     sm.app.flags.DEFINE_integer("num_layers", 2, "Number of layers in the model.")
     sm.app.flags.DEFINE_integer("size", 128, "Size of each model layer.")
@@ -35,12 +35,13 @@ with sm.app.flags.Subcommand("build", dest="action"):
 
 
 with sm.app.flags.Subcommand("train", dest="action"):
-    sm.app.flags.DEFINE_string(r"model_dir", r"C:\Users\seq2seq\model", r"model path of the seq2seq fingerprint.",
+    sm.app.flags.DEFINE_string("model_dir", "/home/xwang/github/seq2seq-fingerprint/model/", "model path of the seq2seq fingerprint.",
                                required=True)
-    sm.app.flags.DEFINE_string(r"train_data", r"C:\Users\seq2seq\pretrain\zinc.tokens.txt", r"train_data for seq2seq fp train.",
+    sm.app.flags.DEFINE_string("train_data", "/home/xwang/github/seq2seq-fingerprint/data/zinc_train.smi", "train_data for seq2seq fp train.",
                                required=True)
-    sm.app.flags.DEFINE_string(r"test_data", r"C:\Users\seq2seq\pretrain\zinc.tokens.txt", r"test data path of the seq2seq fp eval.",
+    sm.app.flags.DEFINE_string("test_data", "/home/xwang/github/seq2seq-fingerprint/data/zinc_test.smi", "test data path of the seq2seq fp eval.",
                                required=True)
+
     sm.app.flags.DEFINE_integer(r"batch_size", 128,
                                 r"Batch size to use during training.")
     sm.app.flags.DEFINE_integer(r"gpu", 0,

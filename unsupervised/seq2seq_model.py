@@ -55,7 +55,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
         """
         self.source_vocab_size = hparams.source_vocab_size
         self.target_vocab_size = hparams.target_vocab_size
-        self.buckets = hparams.buckets
+#        self.buckets = hparams.buckets
         self.size = hparams.size
         self.num_layers = hparams.num_layers
         self.max_gradient_norm = hparams.max_gradient_norm
@@ -70,7 +70,8 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
         self.global_step = tf.Variable(0, trainable=False)
 
         size = hparams.size
-        buckets = hparams.buckets
+#        buckets = hparams.buckets
+        buckets = [[30,30],[60,60],[90,90]]
         dropout_rate = hparams.dropout_rate
         num_layers = hparams.num_layers
 
