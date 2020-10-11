@@ -1,0 +1,1 @@
+{"source_vocab_size": 41, "target_vocab_size": 41, "buckets": [[30, 30], [60, 60], [90, 90]], "size": 128, "num_layers": 3, "dropout_rate": 0.5, "max_gradient_norm": 5.0, "batch_size": 64, "learning_rate": 0.5, "learning_rate_decay_factor": 0.99}
