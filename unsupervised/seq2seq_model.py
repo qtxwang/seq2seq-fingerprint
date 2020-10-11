@@ -116,7 +116,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
             cell = single_cell()
             if num_layers > 1:
                 cell = tf.contrib.rnn.MultiRNNCell(
-                    [single_cell() for _ in xrange(num_layers)])
+                    [single_cell() for _ in range(num_layers)])
             return tf.contrib.legacy_seq2seq.embedding_attention_seq2seq(
                 encoder_inputs,
                 decoder_inputs,
@@ -132,10 +132,10 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
         self.encoder_inputs = []
         self.decoder_inputs = []
         self.target_weights = []
-        for i in xrange(buckets[-1][0]):  # Last bucket is the biggest one.
+        for i in range(buckets[-1][0]):  # Last bucket is the biggest one.
             self.encoder_inputs.append(tf.placeholder(tf.int32, shape=[None],
                                                       name="encoder{0}".format(i)))
-        for i in xrange(buckets[-1][1] + 1):
+        for i in range(buckets[-1][1] + 1):
             self.decoder_inputs.append(tf.placeholder(tf.int32, shape=[None],
                                                       name="decoder{0}".format(i)))
             self.target_weights.append(tf.placeholder(dtype, shape=[None],
@@ -143,7 +143,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
 
         # Our targets are decoder inputs shifted by one.
         targets = [self.decoder_inputs[i + 1]
-                   for i in xrange(len(self.decoder_inputs) - 1)]
+                   for i in range(len(self.decoder_inputs) - 1)]
 
         # Training outputs and losses.
         if forward_only:
@@ -153,7 +153,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
                 softmax_loss_function=softmax_loss_function)
             # If we use output projection, we need to project outputs for decoding.
             if output_projection is not None:
-                for b in xrange(len(buckets)):
+                for b in range(len(buckets)):
                     self.outputs[b] = [
                         tf.matmul(output, output_projection[0]) + output_projection[1]
                         for output in self.outputs[b]
@@ -173,7 +173,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
             self.updates = []
             lr_summary_op = tf.summary.scalar("learning rate", self.learning_rate_op)
             opt = tf.train.GradientDescentOptimizer(self.learning_rate_op)
-            for b in xrange(len(buckets)):
+            for b in range(len(buckets)):
                 gradients = tf.gradients(self.losses[b], params)
                 clipped_gradients, norm = tf.clip_by_global_norm(gradients,
                                                                  hparams.max_gradient_norm)
@@ -262,7 +262,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
                 cell_id,
                 "gru_cell", # In the future, we might have LSTM support.
                 "_%d" % n if n > 0 else ""
-            ) for cell_id in xrange(self.num_layers)]
+            ) for cell_id in range(self.num_layers)]
         return encoder_state_names
 
 
@@ -300,9 +300,9 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
 
         # Input feed: encoder inputs, decoder inputs, target_weights, as provided.
         input_feed = {}
-        for l in xrange(encoder_size):
+        for l in range(encoder_size):
             input_feed[self.encoder_inputs[l].name] = encoder_inputs[l]
-        for l in xrange(decoder_size):
+        for l in range(decoder_size):
             input_feed[self.decoder_inputs[l].name] = decoder_inputs[l]
             input_feed[self.target_weights[l].name] = target_weights[l]
 
@@ -317,7 +317,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
                            self.losses[bucket_id]]  # Loss for this batch.
         else:
             output_feed = [self.losses[bucket_id]]  # Loss for this batch.
-            for l in xrange(decoder_size):          # Output logits.
+            for l in range(decoder_size):          # Output logits.
                 output_feed.append(self.outputs[bucket_id][l])
             if output_encoder_states:
                 default_graph = tf.get_default_graph()
@@ -358,7 +358,7 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
 
         # Get a random batch of encoder and decoder inputs from data,
         # pad them if needed, reverse encoder inputs and add GO to decoder.
-        for _ in xrange(self.batch_size):
+        for _ in range(self.batch_size):
             encoder_input, decoder_input = random.choice(data[bucket_id])
 
             # Encoder inputs are padded and then reversed.
@@ -374,20 +374,20 @@ class Seq2SeqModel(object): # pylint: disable=too-many-instance-attributes
         batch_encoder_inputs, batch_decoder_inputs, batch_weights = [], [], []
 
         # Batch encoder inputs are just re-indexed encoder_inputs.
-        for length_idx in xrange(encoder_size):
+        for length_idx in range(encoder_size):
             batch_encoder_inputs.append(
                 np.array([encoder_inputs[batch_idx][length_idx]
-                          for batch_idx in xrange(self.batch_size)], dtype=np.int32))
+                          for batch_idx in range(self.batch_size)], dtype=np.int32))
 
         # Batch decoder inputs are re-indexed decoder_inputs, we create weights.
-        for length_idx in xrange(decoder_size):
+        for length_idx in range(decoder_size):
             batch_decoder_inputs.append(
                 np.array([decoder_inputs[batch_idx][length_idx]
-                          for batch_idx in xrange(self.batch_size)], dtype=np.int32))
+                          for batch_idx in range(self.batch_size)], dtype=np.int32))
 
             # Create target_weights to be 0 for targets that are padding.
             batch_weight = np.ones(self.batch_size, dtype=np.float32)
-            for batch_idx in xrange(self.batch_size):
+            for batch_idx in range(self.batch_size):
                 # We set weight to 0 if the corresponding target is a PAD symbol.
                 # The corresponding target is decoder_input shifted by 1 forward.
                 if length_idx < decoder_size - 1:

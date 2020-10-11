@@ -18,7 +18,7 @@ from unsupervised.utils import EOS_ID, PAD_ID
 from unsupervised.base_hparams import build_base_hparams
 
 with sm.app.flags.Subcommand("build", dest="action"):
-    sm.app.flags.DEFINE_string("model_dir", "", "model path of the seq2seq fingerprint.",
+    sm.app.flags.DEFINE_string("model_dir", r"C:\Users\seq2seq\model", "model path of the seq2seq fingerprint.",
                                required=True)
     sm.app.flags.DEFINE_integer("num_layers", 2, "Number of layers in the model.")
     sm.app.flags.DEFINE_integer("size", 128, "Size of each model layer.")
@@ -35,19 +35,19 @@ with sm.app.flags.Subcommand("build", dest="action"):
 
 
 with sm.app.flags.Subcommand("train", dest="action"):
-    sm.app.flags.DEFINE_string("model_dir", "", "model path of the seq2seq fingerprint.",
+    sm.app.flags.DEFINE_string(r"model_dir", r"C:\Users\seq2seq\model", r"model path of the seq2seq fingerprint.",
                                required=True)
-    sm.app.flags.DEFINE_string("train_data", "", "train_data for seq2seq fp train.",
+    sm.app.flags.DEFINE_string(r"train_data", r"C:\Users\seq2seq\pretrain\zinc.tokens.txt", r"train_data for seq2seq fp train.",
                                required=True)
-    sm.app.flags.DEFINE_string("test_data", "", "test data path of the seq2seq fp eval.",
+    sm.app.flags.DEFINE_string(r"test_data", r"C:\Users\seq2seq\pretrain\zinc.tokens.txt", r"test data path of the seq2seq fp eval.",
                                required=True)
-    sm.app.flags.DEFINE_integer("batch_size", 128,
-                                "Batch size to use during training.")
-    sm.app.flags.DEFINE_integer("gpu", 0,
-                                "GPU device to use, default: 0.")
-    sm.app.flags.DEFINE_integer("steps_per_checkpoint", 200,
-                                "How many training steps to do per checkpoint.")
-    sm.app.flags.DEFINE_string("summary_dir", "", "Summary dir.")
+    sm.app.flags.DEFINE_integer(r"batch_size", 128,
+                                r"Batch size to use during training.")
+    sm.app.flags.DEFINE_integer(r"gpu", 0,
+                                r"GPU device to use, default: 0.")
+    sm.app.flags.DEFINE_integer(r"steps_per_checkpoint", 200,
+                                r"How many training steps to do per checkpoint.")
+    sm.app.flags.DEFINE_string(r"summary_dir", r"C:\Users\seq2seq\summary", r"Summary dir.")
 
 
 
@@ -116,7 +116,7 @@ def train(train_data, test_data): # pylint: disable=too-many-locals
         print("Reading test data from %s..." % test_data)
         test_set = read_data(test_data, buckets)
 
-        train_bucket_sizes = [len(train_set[b]) for b in xrange(len(buckets))]
+        train_bucket_sizes = [len(train_set[b]) for b in range(len(buckets))]
         train_total_size = float(sum(train_bucket_sizes))
         train_bucket_prob = [size / train_total_size for size in train_bucket_sizes]
 
@@ -142,7 +142,7 @@ def train(train_data, test_data): # pylint: disable=too-many-locals
                 def replace_eos_with_pad(in_seq):
                     """Replace all tokens after EOS in sequence with PAD."""
                     out_seq = in_seq.copy()
-                    for idx in xrange(in_seq.shape[-1]):
+                    for idx in range(in_seq.shape[-1]):
                         eos_list = in_seq[:, idx].reshape(in_seq.shape[0]).tolist()
                         eos_idx = eos_list.index(EOS_ID) if EOS_ID in eos_list else -1
                         out_seq[eos_idx:, idx] = PAD_ID
@@ -154,7 +154,7 @@ def train(train_data, test_data): # pylint: disable=too-many-locals
                 summary_op = tf.summary.scalar("EMAccSummary", em_acc_op)
             return input_ph, output_ph, em_acc_op, summary_op
 
-        test_summary_ops = [get_em_acc_op(bucket_id) for bucket_id in xrange(len(buckets))]
+        test_summary_ops = [get_em_acc_op(bucket_id) for bucket_id in range(len(buckets))]
 
         while True:
             # Choose a bucket according to data distribution. We pick a random number
@@ -189,7 +189,7 @@ def train(train_data, test_data): # pylint: disable=too-many-locals
                 model.save_model_to_dir(model_dir, sess=sess)
                 step_time, loss = 0.0, 0.0
                 # Run evals on development set and print their perplexity.
-                for bucket_id in xrange(len(buckets)):
+                for bucket_id in range(len(buckets)):
                     length_test_set = len(test_set[bucket_id])
                     if length_test_set == 0:
                         print("  eval: empty bucket %d" % (bucket_id))
