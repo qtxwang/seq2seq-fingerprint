@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
-
+import pandas as pd
+import tensorflow.io.gfile as gfile
 from keras.models import Model
 from keras.layers import Input, LSTM, Dense, Embedding, TimeDistributed
 
@@ -81,7 +82,51 @@ decoder_outputs = decoder_td_layer(decoder_outputs_3)
 model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 model.summary()
 
+# Special vocabulary symbols - we always put them at the start.
+_PAD = b"_PAD"
+_GO = b"_GO"
+_EOS = b"_EOS"
+_UNK = b"_UNK"
+_START_VOCAB = [_PAD, _GO, _EOS, _UNK]
 
+PAD_ID = 0
+GO_ID = 1
+EOS_ID = 2
+UNK_ID = 3
+#out_smalltrain.data
+def read_data(source_path, bucket_size):
+   """Read data from source and target files and put into buckets.
+
+   Args:
+       source_path: path to the files with token-ids for the source language.
+       max_size: maximum number of lines to read, all other will be ignored;
+           if 0 or None, data files will be read completely (no limit).
+
+   Returns:
+       data_set: a list of length len(_buckets); data_set[n] contains a list of
+           (source, target) pairs read from the provided data files that fit
+           into the n-th bucket, i.e., such that len(source) < _buckets[n][0] and
+           len(target) < _buckets[n][1]; source and target are lists of token-ids.
+   """
+   data_set = []
+   with gfile.GFile(source_path, mode="r") as source_file:
+      source = source_file.readline()
+      counter = 0
+      while source:
+         source_ids = [int(x) for x in source.split()]
+         target_ids = [int(x) for x in source.split()]
+         target_ids.append(EOS_ID)
+         if len(source_ids) < bucket_size and len(target_ids) < bucket_size:
+            data_set.append([source_ids, target_ids])
+         source = source_file.readline()
+   return data_set
+
+
+train_data_file="C:\work\projects\seq2seq-fingerprint\data\out_smalltrain.dat"
+data_set=read_data(train_data_file,90)
+
+#test_data_file="C:\work\projects\seq2seq-fingerprint\data\out_smalltrain.dat"
+print(data_set)
 # model %>% compile(model, optimizer="adam", loss="mse")
 # model %>% fit(inputs, outputs)
 # model %>% predict ===> fingerprints
